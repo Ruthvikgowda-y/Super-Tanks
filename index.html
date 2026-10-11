@@ -142,9 +142,11 @@ body.touch #iconbar button{padding:9px 11px;font-size:11px;background:#0b1022d9;
 body.touch #stage{flex:1 1 auto}
 body.touch.playing #tc{display:block}
 @media (orientation:portrait){
-  body.touch #app{justify-content:center}
-  body.touch #stage{flex:0 0 auto;height:min(54vh,74vw)}
-  body.touch #iconbar{bottom:auto;top:calc(58px + env(safe-area-inset-top));left:auto;right:8px;transform:none}
+  /* battlefield sits between the HUD and the control deck, never under it */
+  body.touch #app{justify-content:center;padding:50px 0 min(38vh,300px)}
+  body.touch #stage{flex:0 0 auto;height:min(58vh,82vw)}
+  body.touch #iconbar{opacity:.85}
+  body.touch #iconbar{bottom:auto;top:6px;left:auto;right:6px;transform:none}
 }
 /* on-screen control deck */
 #tc{position:fixed;inset:0;z-index:6;pointer-events:none;
@@ -203,7 +205,8 @@ body.notmyturn .tcside{opacity:.22}
   #tc{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
   body.touch #iconbar button{padding:6px 9px;font-size:10px}
 }
-@media (orientation:landscape) and (max-height:430px){ body.touch #iconbar{bottom:auto;top:calc(4px + env(safe-area-inset-top));left:auto;right:calc(8px + env(safe-area-inset-right));transform:none} }
+/* keep the icon row clear of the floating score HUD in landscape */
+@media (orientation:landscape){ body.touch #iconbar{bottom:auto;top:calc(50px + env(safe-area-inset-top));left:auto;right:calc(6px + env(safe-area-inset-right));transform:none} }
 /* bigger tap targets for menus on touch */
 body.touch .seg button{min-height:56px;font-size:13px}
 body.touch button{font-size:15px}
@@ -219,9 +222,10 @@ body.touch .wc{padding:10px}
 body.touch .wc p{font-size:12px}
 body.touch .dhead h2{font-size:16px;letter-spacing:2px}
 body.touch #dstatus{font-size:11px}
-body.touch .picks{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-body.touch .picks h4{width:100%;margin:0 0 2px}
-body.touch .picks .pk{border-bottom:0;padding:4px 8px;background:#0d1330;border-radius:9px;font-size:12px}
+body.touch .picks h4{margin:0 0 4px}
+body.touch .picks>div{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+body.touch .picks .pk{border-bottom:0;padding:4px 8px;background:#0d1330;border:1px solid #182046;border-radius:9px;font-size:11px}
+body.touch #dgrid{max-height:38vh}
 body.touch #otitle{font-size:34px}
 body.touch table.st{font-size:14px}
 </style>
@@ -383,7 +387,11 @@ body.touch table.st{font-size:14px}
 // World height is fixed; width adapts to the device's screen shape on touch devices so the
 // battlefield fills the display edge to edge. Desktop keeps the original 1280×720 exactly.
 let W=1280; const H=720,BED=H-6,SUB=4,VK=9.2;
-const TOUCH=true;
+const TOUCH=(()=>{ try{
+    const q=(location.search||'')+(location.hash||'');
+    if(q.indexOf('desktop')>=0) return false; if(q.indexOf('touch')>=0) return true;
+    return (typeof matchMedia==='function'&&matchMedia('(pointer:coarse)').matches)||(typeof navigator!=='undefined'&&navigator.maxTouchPoints>0);
+  }catch(e){ return false; } })();
 const cv=document.getElementById('cv'); let ctx=cv.getContext('2d');
 const mbCan=document.createElement('canvas'); mbCan.width=W; mbCan.height=H; const mbCtx=mbCan.getContext('2d');
 const prevCan=document.createElement('canvas'); prevCan.width=W; prevCan.height=H; const prevCtx=prevCan.getContext('2d');
@@ -686,11 +694,11 @@ function dirtColor(x,y,d){
 }
 // Resize the world to match the screen shape (touch only). Every canvas and the column
 // bookkeeping array are rebuilt to the new width.
-function setWorldSize(w){ w=Math.round(clamp(w,820,2000)); W=w;
+function setWorldSize(w){ w=Math.round(clamp(w,760,2000)); W=w;
   cv.width=W; tcan.width=W; mbCan.width=W; prevCan.width=W; settleFlag=new Uint8Array(W); settleList=[]; hasPrev=false; mbIdle=0; }
 function worldWidthFor(){ if(!TOUCH) return 1280;
   try{ const st=$('stage'),w=st.clientWidth||innerWidth,h=st.clientHeight||innerHeight;
-    if(!w||!h) return 1280; return clamp(Math.round(H*(w/h)),820,2000); }catch(e){ return 1280; } }
+    if(!w||!h) return 1280; return clamp(Math.round(H*(w/h)),760,2000); }catch(e){ return 1280; } }
 function genTerrain(){
   img=tctx.createImageData(W,H); px=new Uint32Array(img.data.buffer);
   const hts=new Float32Array(W),comps=[];
@@ -1059,7 +1067,9 @@ function newArena(key){ projs.forEach(stopVoice); arenaKey=key==='random'?pick(A
   genBackground(); genTerrain(); }
 function startMatch(){
   Sfx.init(); newArena(settings.arena); const d=DIFFS[settings.diff];
-  tanks=[new Tank(false,rand(W*0.086,W*0.226),'#35e0ff','YOU'),new Tank(true,rand(W*0.774,W*0.914),d.color,d.bot)];
+  // On touch the tanks start further in from the edges so they never hide behind the on-screen controls.
+  const L=TOUCH?[0.20,0.31]:[0.086,0.226],R=TOUCH?[0.69,0.80]:[0.774,0.914];
+  tanks=[new Tank(false,rand(W*L[0],W*L[1]),'#35e0ff','YOU'),new Tank(true,rand(W*R[0],W*R[1]),d.color,d.bot)];
   turn=0; shotsFired=0; totalShots=settings.count*2; Bot.zeroN=0; Bot.lastPX=null;
   $('n1').textContent=d.bot+' · '+d.name; $('n1').style.color=d.color; $('s1').style.color=d.color;
   const n=Math.min(WEAPONS.length,settings.count*2+5); const pool=shuffle(WEAPONS.slice()).slice(0,n).sort((a,b)=>b.tier-a.tier||b.value-a.value);
