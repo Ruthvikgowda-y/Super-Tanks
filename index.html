@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#04050d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Super Tanks</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -10,7 +14,7 @@
 :root{--bg:#04050d;--panel:#0b1022;--line:#1f2a4d;--txt:#dbe6ff;--dim:#7d8bb3;--cyan:#35e0ff;--red:#ff4d6d;--gold:#ffc94d;--mag:#ff3ea5;
   --hud:'Orbitron','Segoe UI',system-ui,sans-serif;--body:'Rajdhani','Segoe UI',system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--body);overflow:hidden;user-select:none;-webkit-user-select:none}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--body);overflow:hidden;user-select:none;-webkit-user-select:none;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 #app{position:fixed;inset:0;display:flex;flex-direction:column}
 #top,#panel{display:none}
 #app.ingame #top,#app.ingame #panel{display:flex}
@@ -114,6 +118,112 @@ table.st td:first-child{text-align:left;color:var(--dim)}
   .row2{grid-template-columns:1fr}.dwrap{grid-template-columns:1fr}.logo{font-size:36px}.pscore{font-size:22px;min-width:50px}
   .wgrp{width:100%}.hgrid{grid-template-columns:1fr}.card{padding:18px}
 }
+
+/* ======================= TOUCH / MOBILE ======================= */
+#tc,#wtray,#bFull{display:none}
+body.touch #bFull{display:inline-block}
+body.touch #panel{display:none!important}
+body.touch .overlay{padding:calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left))}
+/* top HUD floats over the battlefield instead of stealing height */
+body.touch #top{position:absolute;top:0;left:0;right:0;z-index:4;min-height:0;border-bottom:0;gap:6px;
+  padding:calc(3px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 10px calc(8px + env(safe-area-inset-left));
+  background:linear-gradient(rgba(4,6,16,.92),rgba(4,6,16,.55) 60%,rgba(4,6,16,0))}
+body.touch .pcard{gap:7px}
+body.touch .pscore{font-size:21px;min-width:0;text-shadow:0 0 10px currentColor}
+body.touch .pname{font-size:9px;letter-spacing:1px}
+body.touch .pmeta{display:none}
+body.touch .badges{gap:3px;margin-top:1px;min-height:0}
+body.touch .badge{font-size:7px;padding:1px 4px;letter-spacing:.5px}
+body.touch #turnlbl{font-size:11px;letter-spacing:1.5px}
+body.touch #gravbox,body.touch #roundlbl{font-size:8px;letter-spacing:1px}
+body.touch #banner{font-size:clamp(20px,6vw,38px);letter-spacing:4px;top:24%}
+body.touch #iconbar{top:auto;bottom:calc(10px + env(safe-area-inset-bottom));left:50%;right:auto;transform:translateX(-50%);gap:8px}
+body.touch #iconbar button{padding:9px 11px;font-size:11px;background:#0b1022d9;border-color:#2b3a66}
+body.touch #stage{flex:1 1 auto}
+body.touch.playing #tc{display:block}
+@media (orientation:portrait){
+  body.touch #app{justify-content:center}
+  body.touch #stage{flex:0 0 auto;height:min(54vh,74vw)}
+  body.touch #iconbar{bottom:auto;top:calc(58px + env(safe-area-inset-top));left:auto;right:8px;transform:none}
+}
+/* on-screen control deck */
+#tc{position:fixed;inset:0;z-index:6;pointer-events:none;
+  padding:0 calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
+.tcside{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center;gap:9px;transition:opacity .25s}
+#tcL{left:0}#tcR{right:0}
+body.notmyturn .tcside{opacity:.22}
+.trow{display:flex;gap:8px;align-items:center;pointer-events:auto}
+.tbtn{pointer-events:auto;min-width:54px;height:46px;padding:0 10px;border-radius:13px;background:rgba(12,18,44,.74);
+  border:1px solid rgba(120,165,255,.38);color:var(--txt);font-family:var(--hud);font-size:15px;font-weight:700;
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);touch-action:none;transition:none}
+.tbtn:active:not(:disabled){background:rgba(53,224,255,.34);border-color:var(--cyan)}
+.tbtn:disabled{opacity:.3}
+.tbtn small{display:block;font-size:8px;color:var(--dim);letter-spacing:1px}
+#aimpad{pointer-events:auto;width:122px;height:122px;border-radius:50%;position:relative;touch-action:none;
+  background:radial-gradient(circle at 50% 50%,rgba(20,30,66,.6),rgba(6,10,26,.38));
+  border:2px solid rgba(53,224,255,.45);box-shadow:0 0 22px -8px var(--cyan),inset 0 0 26px -12px var(--cyan)}
+#aimpad::before{content:'';position:absolute;inset:9px;border-radius:50%;border:1px dashed rgba(255,255,255,.14);border-bottom-color:transparent}
+#aimknob{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 38% 32%,#b7f3ff,#1a7ea8 72%);box-shadow:0 0 18px -2px var(--cyan),0 3px 8px #0009}
+#aimread{font-family:var(--hud);font-size:13px;font-weight:700;color:#fff;text-shadow:0 0 8px #000,0 0 14px var(--cyan);letter-spacing:1px}
+#fireBtn{pointer-events:auto;width:112px;height:112px;border-radius:50%;border:none;position:relative;touch-action:none;
+  font-family:var(--hud);font-weight:900;font-size:17px;letter-spacing:2px;color:#fff;padding:0;
+  background:radial-gradient(circle at 50% 40%,#ff9a4d,#ff2e6b 72%);box-shadow:0 0 34px -8px #ff3e7a,0 5px 16px #0009}
+#fireBtn:active:not(:disabled){transform:scale(.95)}
+#fireBtn:disabled{filter:grayscale(.75);opacity:.38}
+#fireBtn .ring{position:absolute;inset:-1px;transform:rotate(-90deg);overflow:visible}
+#fireBtn .ring circle{fill:none;stroke-width:5}
+#fireBtn .ring .bg{stroke:rgba(255,255,255,.2)}
+#fireBtn .ring .fg{stroke:#a6f1ff;stroke-linecap:round;stroke-dasharray:289;stroke-dashoffset:289;filter:drop-shadow(0 0 4px var(--cyan))}
+#fireBtn span{position:relative;z-index:1;text-shadow:0 2px 6px #0007}
+#wbtn{pointer-events:auto;display:flex;align-items:center;gap:8px;height:50px;max-width:44vw;padding:0 12px;border-radius:14px;
+  background:rgba(12,18,44,.78);border:1px solid rgba(120,165,255,.4);color:var(--txt);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+#wbtn .ico{width:30px;height:30px;border-radius:9px}
+#wbtnName{font-family:var(--hud);font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.5px}
+#wbtnCount{font-family:var(--hud);font-size:10px;color:var(--dim)}
+.pips{display:flex;gap:3px;justify-content:center}
+.pip{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.pip.off{background:#2a3358;box-shadow:none}
+#wtray{position:fixed;inset:0;z-index:14;background:rgba(3,5,14,.88);overflow:auto;
+  padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom))}
+#wtray.show{display:block}
+#wtray h3{font-family:var(--hud);font-size:13px;letter-spacing:3px;color:var(--dim);text-align:center;margin-bottom:12px}
+#wtrayGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:9px;max-width:720px;margin:0 auto}
+.wt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:11px 5px;border-radius:14px;background:#0d1330;
+  border:1px solid var(--line);font-family:var(--hud);font-size:10px;line-height:1.25;text-align:center;color:var(--txt);letter-spacing:.3px}
+.wt.sel{border-color:var(--cyan);box-shadow:0 0 16px -5px var(--cyan);background:#13204a}
+#wtrayClose{display:block;margin:14px auto 0;padding:13px 30px;letter-spacing:3px}
+/* short landscape phones: shrink the deck so it never eats the battlefield */
+@media (orientation:landscape) and (max-height:430px){
+  #aimpad{width:96px;height:96px}#aimknob{width:38px;height:38px;margin:-19px 0 0 -19px}
+  #fireBtn{width:90px;height:90px;font-size:14px}
+  .tbtn{height:40px;min-width:46px;font-size:13px;border-radius:11px}
+  #wbtn{height:42px}#wbtn .ico{width:26px;height:26px}
+  .tcside{gap:7px}
+  #tc{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+  body.touch #iconbar button{padding:6px 9px;font-size:10px}
+}
+@media (orientation:landscape) and (max-height:430px){ body.touch #iconbar{bottom:auto;top:calc(4px + env(safe-area-inset-top));left:auto;right:calc(8px + env(safe-area-inset-right));transform:none} }
+/* bigger tap targets for menus on touch */
+body.touch .seg button{min-height:56px;font-size:13px}
+body.touch button{font-size:15px}
+body.touch .big{padding:18px;font-size:20px}
+body.touch .btnrow button{padding:16px}
+body.touch .card{padding:16px 14px}
+.logo{font-size:clamp(30px,7vw,56px)}
+body.touch .sub{font-size:15px;margin:6px 0 14px}
+/* weapon draft stacks into one scrollable column on phones */
+body.touch .dwrap{grid-template-columns:1fr;gap:10px}
+body.touch #dgrid{max-height:46vh;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:8px}
+body.touch .wc{padding:10px}
+body.touch .wc p{font-size:12px}
+body.touch .dhead h2{font-size:16px;letter-spacing:2px}
+body.touch #dstatus{font-size:11px}
+body.touch .picks{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+body.touch .picks h4{width:100%;margin:0 0 2px}
+body.touch .picks .pk{border-bottom:0;padding:4px 8px;background:#0d1330;border-radius:9px;font-size:12px}
+body.touch #otitle{font-size:34px}
+body.touch table.st{font-size:14px}
 </style>
 </head>
 <body>
@@ -136,7 +246,7 @@ table.st td:first-child{text-align:left;color:var(--dim)}
   <div id="stage">
     <canvas id="cv" width="1280" height="720"></canvas>
     <div id="banner"></div>
-    <div id="iconbar"><button id="bMusic" title="Music (N)">MUS</button><button id="bSound" title="Sound (M)">SND</button><button id="bHelp" title="Help (H)">?</button><button id="bPause" title="Pause (Esc)">II</button></div>
+    <div id="iconbar"><button id="bFull" title="Fullscreen">⛶</button><button id="bMusic" title="Music (N)">MUS</button><button id="bSound" title="Sound (M)">SND</button><button id="bHelp" title="Help (H)">?</button><button id="bPause" title="Pause (Esc)">II</button></div>
   </div>
   <div id="panel">
     <div class="grp wgrp">
@@ -149,6 +259,32 @@ table.st td:first-child{text-align:left;color:var(--dim)}
     <div class="grp"><label>MOVE A / D · FUEL <span id="fuelv">4</span></label><div class="ctl"><button id="mLeft">◀ DRIVE</button><button id="mRight">DRIVE ▶</button></div></div>
     <button id="fire">FIRE</button>
   </div>
+</div>
+
+<!-- ON-SCREEN TOUCH CONTROLS -->
+<div id="tc">
+  <div class="tcside" id="tcL">
+    <div class="trow"><button class="tbtn" id="nAm">−<small>ANGLE</small></button><button class="tbtn" id="nAp">+<small>ANGLE</small></button></div>
+    <div class="trow"><button class="tbtn" id="dL">◀<small>DRIVE</small></button><button class="tbtn" id="dR">▶<small>DRIVE</small></button></div>
+    <div class="pips" id="fuelPips"></div>
+    <div id="aimpad"><div id="aimknob"></div></div>
+    <div id="aimread">45° · 60</div>
+  </div>
+  <div class="tcside" id="tcR">
+    <div class="trow"><button class="tbtn" id="nPm">−<small>POWER</small></button><button class="tbtn" id="nPp">+<small>POWER</small></button></div>
+    <button id="wbtn"><span class="ico" id="wbtnIco"></span><span id="wbtnName">—</span><span id="wbtnCount"></span></button>
+    <button id="fireBtn">
+      <svg class="ring" viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="46"/><circle class="fg" id="fring" cx="50" cy="50" r="46"/></svg>
+      <span>FIRE</span>
+    </button>
+  </div>
+</div>
+
+<!-- WEAPON TRAY -->
+<div id="wtray">
+  <h3>SELECT WEAPON</h3>
+  <div id="wtrayGrid"></div>
+  <button id="wtrayClose" class="pri">CLOSE</button>
 </div>
 
 <!-- MENU -->
@@ -211,6 +347,8 @@ table.st td:first-child{text-align:left;color:var(--dim)}
       <div><span>Switch weapon</span><span><kbd>Q</kbd> <kbd>E</kbd> / <kbd>Tab</kbd></span></div>
       <div><span>Fire</span><span><kbd>Space</kbd> / <kbd>Enter</kbd></span></div>
       <div><span>Mouse aim</span><span>Drag on battlefield</span></div>
+      <div><span>On a phone</span><span>Stick + FIRE buttons</span></div>
+      <div><span>Phone: pick weapon</span><span>Tap the weapon chip</span></div>
       <div><span>Pause · Sound · Help</span><span><kbd>Esc</kbd> <kbd>M</kbd> <kbd>H</kbd></span></div>
       <div><span>Music on/off</span><span><kbd>N</kbd></span></div>
       <div><span>Motion blur Off/Low/High</span><span><kbd>B</kbd></span></div>
@@ -242,7 +380,10 @@ table.st td:first-child{text-align:left;color:var(--dim)}
 (()=>{
 'use strict';
 /* ============================ CONSTANTS & UTILS ============================ */
-const W=1280,H=720,BED=H-6,SUB=4,VK=9.2;
+// World height is fixed; width adapts to the device's screen shape on touch devices so the
+// battlefield fills the display edge to edge. Desktop keeps the original 1280×720 exactly.
+let W=1280; const H=720,BED=H-6,SUB=4,VK=9.2;
+const TOUCH=true;
 const cv=document.getElementById('cv'); let ctx=cv.getContext('2d');
 const mbCan=document.createElement('canvas'); mbCan.width=W; mbCan.height=H; const mbCtx=mbCan.getContext('2d');
 const prevCan=document.createElement('canvas'); prevCan.width=W; prevCan.height=H; const prevCtx=prevCan.getContext('2d');
@@ -261,7 +402,8 @@ const _rc={};
 function rgba(hex,a){let c=_rc[hex];if(!c){let h=hex.slice(1);if(h.length===3)h=h.split('').map(x=>x+x).join('');c=_rc[hex]=[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}return `rgba(${c[0]},${c[1]},${c[2]},${clamp(a,0,1).toFixed(3)})`;}
 const fa=a=>clamp(a,0,1).toFixed(3);
 const store={get(k,d){try{const v=localStorage.getItem('supertanks.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('supertanks.'+k,JSON.stringify(v));}catch(e){}}};
-const settings=Object.assign({diff:1,arena:'random',count:8,assist:1,sound:true,music:1,blur:2},store.get('settings',{}));
+const settings=Object.assign({diff:1,arena:'random',count:8,assist:1,sound:true,music:1,blur:TOUCH?1:2},store.get('settings',{}));
+function vib(p){ try{ if(TOUCH&&navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 
 /* ============================ DATA ============================ */
 const DIFFS=[
@@ -518,7 +660,7 @@ let img=null,px=null;
 let tanks=[],projs=[],fx=[],parts=[],texts=[],timers=[],crates=[],twinkles=[];
 let turn=0,state='menu',paused=false,quietT=0,shake=0,flash=0,slowT=0,shotsFired=0,totalShots=0,bubble=null,gameT=0;
 let dMin=W,dMax=-1;
-const settleFlag=new Uint8Array(W); let settleList=[];
+let settleFlag=new Uint8Array(W),settleList=[];
 const player=()=>tanks[0],botT=()=>tanks[1],cur=()=>tanks[turn];
 const other=t=>tanks[0]===t?tanks[1]:tanks[0];
 
@@ -542,12 +684,21 @@ function dirtColor(x,y,d){
   const band=((Math.floor((y+Math.sin(x*0.021)*9+Math.sin(x*0.007)*14)/13))&1)?0.9:1, k=band*(0.92+Math.random()*0.12);
   return pack(clamp((a[0]+(b[0]-a[0])*t)*k,0,255)|0,clamp((a[1]+(b[1]-a[1])*t)*k,0,255)|0,clamp((a[2]+(b[2]-a[2])*t)*k,0,255)|0);
 }
+// Resize the world to match the screen shape (touch only). Every canvas and the column
+// bookkeeping array are rebuilt to the new width.
+function setWorldSize(w){ w=Math.round(clamp(w,820,2000)); W=w;
+  cv.width=W; tcan.width=W; mbCan.width=W; prevCan.width=W; settleFlag=new Uint8Array(W); settleList=[]; hasPrev=false; mbIdle=0; }
+function worldWidthFor(){ if(!TOUCH) return 1280;
+  try{ const st=$('stage'),w=st.clientWidth||innerWidth,h=st.clientHeight||innerHeight;
+    if(!w||!h) return 1280; return clamp(Math.round(H*(w/h)),820,2000); }catch(e){ return 1280; } }
 function genTerrain(){
   img=tctx.createImageData(W,H); px=new Uint32Array(img.data.buffer);
   const hts=new Float32Array(W),comps=[];
   for(let i=0;i<6;i++) comps.push({a:rand(0.4,1)*(95/(i+1.2)),f:(0.0022+Math.random()*0.0022)*(i+1)*0.8,p:rand(0,Math.PI*2)});
-  const base=arena.islands?H*0.85:H*rand(0.56,0.66), ampK=arena.islands?0.3:1;
-  for(let x=0;x<W;x++){ let h=base; for(const c of comps) h+=Math.sin(x*c.f+c.p)*c.a*ampK; hts[x]=clamp(h,H*0.28,H-40); }
+  // On phones the ground is kept higher so tanks never sit underneath the on-screen controls.
+  const base=arena.islands?H*(TOUCH?0.70:0.85):H*(TOUCH?rand(0.48,0.58):rand(0.56,0.66)), ampK=arena.islands?0.3:1;
+  const floor=TOUCH?H*0.68:H-40;
+  for(let x=0;x<W;x++){ let h=base; for(const c of comps) h+=Math.sin(x*c.f+c.p)*c.a*ampK; hts[x]=clamp(h,H*0.28,floor); }
   for(let x=0;x<W;x++){ const s=Math.floor(hts[x]); for(let y=s;y<H;y++) px[y*W+x]=dirtColor(x,y,y-s); }
   if(arena.islands){ const n=randi(4,6);
     for(let i=0;i<n;i++){ const cx=rand(120,W-120),cy=rand(H*0.3,H*0.62),rx=rand(70,150),ry=rand(24,42),ph=rand(0,6);
@@ -695,7 +846,8 @@ function award(owner,target,pts,x,y){
   let m=1; if(owner.ocActive) m*=1.5; m*=1+Math.min(owner.streak,5)*0.1; if(sh) m*=0.4;
   const v=Math.max(1,Math.round(pts*m)); owner.score+=v; owner.turnDealt+=v; target.takenTurn+=v; target.flash=0.5;
   const crit=v>=55; floatText(target.x+rand(-10,10),target.y-40-rand(0,12),(crit?'CRITICAL +':'+')+v,crit?'#ffc94d':owner.color,crit?24:17);
-  if(crit){ slowT=0.75; flash=Math.max(flash,0.25); Music.sting('crit'); }
+  if(crit){ slowT=0.75; flash=Math.max(flash,0.25); Music.sting('crit'); vib([0,30,40,70]); }
+  else if(target!==owner&&!owner.bot) vib(14);
   return v;
 }
 function collectCrate(c,owner){ if(c.dead||!owner) return; c.dead=true; owner.stats.crates++; const C=CRATES[c.type];
@@ -901,12 +1053,13 @@ function finish(){
 
 /* ============================ MATCH SETUP / DRAFT ============================ */
 let draft=null;
-function newArena(key){ projs.forEach(stopVoice); arenaKey=key==='random'?pick(ARENA_KEYS):key; arena=ARENAS[arenaKey]; G=arena.g; Music.setMood(arenaKey); mbCtx.clearRect(0,0,W,H); hasPrev=false;
+function newArena(key){ projs.forEach(stopVoice); arenaKey=key==='random'?pick(ARENA_KEYS):key; arena=ARENAS[arenaKey]; G=arena.g; Music.setMood(arenaKey);
+  setWorldSize(worldWidthFor()); fit(); mbCtx.clearRect(0,0,W,H); hasPrev=false;
   projs=[];fx=[];parts=[];texts=[];timers=[];crates=[];settleList=[];settleFlag.fill(0);bubble=null;
   genBackground(); genTerrain(); }
 function startMatch(){
   Sfx.init(); newArena(settings.arena); const d=DIFFS[settings.diff];
-  tanks=[new Tank(false,rand(110,290),'#35e0ff','YOU'),new Tank(true,rand(990,1170),d.color,d.bot)];
+  tanks=[new Tank(false,rand(W*0.086,W*0.226),'#35e0ff','YOU'),new Tank(true,rand(W*0.774,W*0.914),d.color,d.bot)];
   turn=0; shotsFired=0; totalShots=settings.count*2; Bot.zeroN=0; Bot.lastPX=null;
   $('n1').textContent=d.bot+' · '+d.name; $('n1').style.color=d.color; $('s1').style.color=d.color;
   const n=Math.min(WEAPONS.length,settings.count*2+5); const pool=shuffle(WEAPONS.slice()).slice(0,n).sort((a,b)=>b.tier-a.tier||b.value-a.value);
@@ -934,7 +1087,9 @@ function botDraftPick(){ if(state!=='draft') return; const d=DIFFS[settings.diff
   for(const w of draft.pool){ if(draft.taken[w.id]!==undefined) continue; let s=w.value+gauss()*d.noise; if(w.id==='shield'&&d.id>=2) s=62; if(s>bs){bs=s;best=w;} }
   if(best) draftTake(best.id,1); }
 function autoPick(){ if(state!=='draft') return; const free=draft.pool.filter(w=>draft.taken[w.id]===undefined); if(!free.length) return; free.sort((a,b)=>(b.value+rand(-15,15))-(a.value+rand(-15,15))); draftTake(free[0].id,0); }
-function beginBattle(){ if(state!=='draft') return; show('draft',false); $('app').classList.add('ingame'); fit(); tanks.forEach(t=>{ t.y=surfaceY(t.x); }); startTurn(); }
+function beginBattle(){ if(state!=='draft') return; show('draft',false); $('app').classList.add('ingame');
+  try{ document.body.classList.add('playing'); }catch(e){}
+  fit(); tanks.forEach(t=>{ t.y=surfaceY(t.x); }); startTurn(); }
 
 /* ============================ RENDER ============================ */
 function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
@@ -1069,6 +1224,7 @@ function syncHUD(){
   ['wprev','wnext','aMinus','aPlus','pMinus','pPlus','fire'].forEach(id=>$(id).disabled=!my);
   sl.disabled=!my; $('mLeft').disabled=$('mRight').disabled=!my||p.fuel<=0||p.frozen||p.drive!==0;
   setT('bSound',settings.sound?'SND':'<s>SND</s>'); setT('bMusic',settings.music?'MUS':'<s>MUS</s>');
+  syncTouch(p,my,w);
 }
 
 /* ============================ INPUT ============================ */
@@ -1102,6 +1258,62 @@ cv.addEventListener('pointerdown',e=>{ if(state!=='aim'||paused) return; Sfx.ini
 cv.addEventListener('pointermove',e=>{ if(drag&&state==='aim') aimAt(cvPos(e)); });
 const endDrag=()=>{ drag=null; }; cv.addEventListener('pointerup',endDrag); cv.addEventListener('pointercancel',endDrag);
 
+/* ============================ TOUCH CONTROLS ============================ */
+function tap(el,fn){ if(!el) return; el.addEventListener('pointerdown',e=>{ e.preventDefault(); Sfx.init(); fn(); }); }
+function openTray(){ const t=player(); if(!t||!t.weapons.length||state!=='aim') return;
+  $('wtrayGrid').innerHTML=t.weapons.map((id,i)=>{ const w=WMAP[id];
+    return `<button class="wt${i===t.sel?' sel':''}" data-i="${i}">${icoHTML(w,22)}<span>${w.name.toUpperCase()}</span></button>`; }).join('');
+  show('wtray',true); }
+function toggleFull(){ try{ const d=document,el=d.documentElement;
+    if(!d.fullscreenElement&&!d.webkitFullscreenElement){ const r=el.requestFullscreen||el.webkitRequestFullscreen;
+      if(r) Promise.resolve(r.call(el)).then(()=>{ try{ if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} }).catch(()=>{}); }
+    else { const x=d.exitFullscreen||d.webkitExitFullscreen; if(x) Promise.resolve(x.call(d)).catch(()=>{}); }
+  }catch(e){} }
+function initTouch(){
+  if(!TOUCH) return;
+  try{ document.body.classList.add('touch'); }catch(e){}
+  // Virtual aim stick: direction sets the barrel angle, distance from centre sets power.
+  const pad=$('aimpad'); let padOn=false;
+  const padSet=e=>{ const t=player(); if(!t||state!=='aim'||paused) return;
+    const r=pad.getBoundingClientRect(),R=Math.max(10,r.width/2-8);
+    const dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),len=Math.hypot(dx,dy);
+    if(len<8) return;
+    let a=Math.atan2(-dy,dx)*180/Math.PI; if(a<0) a=a<-90?180:0;
+    t.angle=clamp(Math.round(a),0,180); t.power=clamp(Math.round(Math.min(len,R)/R*100),0,100); syncHUD(); };
+  pad.addEventListener('pointerdown',e=>{ e.preventDefault(); Sfx.init(); padOn=true; try{pad.setPointerCapture(e.pointerId);}catch(_){} padSet(e); });
+  pad.addEventListener('pointermove',e=>{ if(padOn){ e.preventDefault(); padSet(e); } });
+  const padEnd=()=>{ padOn=false; }; pad.addEventListener('pointerup',padEnd); pad.addEventListener('pointercancel',padEnd);
+  holdBtn($('nAm'),()=>adj('a',-1)); holdBtn($('nAp'),()=>adj('a',1));
+  holdBtn($('nPm'),()=>adj('p',-1)); holdBtn($('nPp'),()=>adj('p',1));
+  tap($('dL'),()=>{ vib(8); playerMove(-1); }); tap($('dR'),()=>{ vib(8); playerMove(1); });
+  tap($('fireBtn'),()=>{ if(state!=='aim'||paused) return; vib(35); playerFire(); });
+  tap($('wbtn'),openTray);
+  tap($('wtrayClose'),()=>show('wtray',false));
+  $('wtrayGrid').addEventListener('click',e=>{ const b=e.target.closest('.wt'); if(!b) return; const t=player(); if(!t) return;
+    t.sel=clamp(+b.dataset.i,0,t.weapons.length-1); Sfx.click(); Music.motif(WMAP[t.weapons[t.sel]],0.45); vib(8); show('wtray',false); syncHUD(); });
+  // Kill browser gestures that fight with the game: pinch zoom, double-tap zoom, rubber-band scroll.
+  ['gesturestart','gesturechange','gestureend'].forEach(g=>document.addEventListener(g,e=>e.preventDefault(),{passive:false}));
+  document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+  document.addEventListener('touchmove',e=>{ try{ if(e.target.closest&&e.target.closest('.overlay,#wtray')) return; }catch(_){} e.preventDefault(); },{passive:false});
+}
+function syncTouch(p,my,w){
+  if(!TOUCH||!p) return;
+  try{ document.body.classList.toggle('notmyturn',state!=='aim'); }catch(e){}
+  const R=Math.max(10,($('aimpad').clientWidth||122)/2-8),a=p.angle*Math.PI/180,m=R*clamp(p.power,0,100)/100;
+  $('aimknob').style.transform=`translate(${(Math.cos(a)*m).toFixed(1)}px,${(-Math.sin(a)*m).toFixed(1)}px)`;
+  setT('aimread',Math.round(p.angle)+'° · '+Math.round(p.power));
+  const fr=$('fring'); if(fr) fr.style.strokeDashoffset=(289*(1-clamp(p.power,0,100)/100)).toFixed(1);
+  $('fireBtn').disabled=!my;
+  $('dL').disabled=$('dR').disabled=!my||p.fuel<=0||p.frozen||p.drive!==0;
+  ['nAm','nAp','nPm','nPp'].forEach(id=>{ $(id).disabled=!my; });
+  if(w){ const bi=$('wbtnIco'); if(bi.dataset.w!==w.id){ bi.dataset.w=w.id; bi.innerHTML=iconSVG(w.id,18); bi.style.color=w.color; }
+    setT('wbtnName',w.name.toUpperCase()); setT('wbtnCount',(p.sel+1)+'/'+p.weapons.length); }
+  else { setT('wbtnName','—'); setT('wbtnCount',''); const bi=$('wbtnIco'); if(bi.dataset.w!==''){ bi.dataset.w=''; bi.innerHTML=''; } }
+  const total=Math.max(4,p.fuel); let pips='';
+  for(let i=0;i<total;i++) pips+=`<span class="pip${i<p.fuel?'':' off'}"></span>`;
+  setT('fuelPips',pips);
+}
+
 /* ============================ MENUS ============================ */
 function show(id,on){ $(id).classList.toggle('show',on); }
 function togglePause(){ if(!$('app').classList.contains('ingame')||state==='over') return; paused=!paused; show('pause',paused); }
@@ -1121,17 +1333,24 @@ seg('optBlur',[{v:0,label:'OFF'},{v:1,label:'LOW'},{v:2,label:'HIGH'}],'blur',()
 $('btnStart').onclick=()=>startMatch();
 $('btnAuto').onclick=()=>{ if(!draft||draft.auto) return; draft.auto=true; if(draft.turn===0) autoPick(); };
 $('dgrid').addEventListener('click',e=>{ const c=e.target.closest('.wc'); if(!c||state!=='draft'||draft.turn!==0||draft.auto) return; if(tanks[0].weapons.length>=draft.n) return; draftTake(c.dataset.id,0); });
-function toMenu(){ state='menu'; paused=false; tanks=[]; show('over',false); show('pause',false); show('draft',false); $('app').classList.remove('ingame'); fit(); newArena(settings.arena); refreshRecord(); refreshSegs(); show('menu',true); }
+function toMenu(){ state='menu'; paused=false; tanks=[]; show('over',false); show('pause',false); show('draft',false); show('wtray',false); $('app').classList.remove('ingame');
+  try{ document.body.classList.remove('playing'); }catch(e){} fit(); newArena(settings.arena); refreshRecord(); refreshSegs(); show('menu',true); }
 $('btnMenu').onclick=toMenu; $('btnQuit').onclick=toMenu;
-$('btnRematch').onclick=()=>{ show('over',false); $('app').classList.remove('ingame'); startMatch(); };
+$('btnRematch').onclick=()=>{ show('over',false); $('app').classList.remove('ingame'); try{ document.body.classList.remove('playing'); }catch(e){} startMatch(); };
+$('bFull').onclick=e=>{ e.currentTarget.blur(); toggleFull(); };
 $('btnResume').onclick=togglePause; $('btnPHelp').onclick=()=>show('help',true); $('btnHelpClose').onclick=()=>show('help',false);
 $('bHelp').onclick=e=>{ e.currentTarget.blur(); show('help',true); }; $('bPause').onclick=e=>{ e.currentTarget.blur(); togglePause(); }; $('bSound').onclick=e=>{ e.currentTarget.blur(); toggleSound(); }; $('bMusic').onclick=e=>{ e.currentTarget.blur(); toggleMusic(); };
 function refreshSegs(){ ['optMusic','optBlur','optDiff','optArena','optCount','optAssist'].forEach(id=>{ const k={optMusic:'music',optBlur:'blur',optDiff:'diff',optArena:'arena',optCount:'count',optAssist:'assist'}[id]; [...$(id).children].forEach(b=>b.classList.toggle('on',String(settings[k])===b.dataset.v)); }); }
 
 /* ============================ BOOT ============================ */
-function fit(){ const st=$('stage'),s=Math.min(st.clientWidth/W,st.clientHeight/H); cv.style.width=Math.floor(W*s)+'px'; cv.style.height=Math.floor(H*s)+'px'; }
-addEventListener('resize',fit);
-newArena(settings.arena); fit(); refreshRecord();
+function fit(){ const st=$('stage'); if(!st||!st.clientWidth) return; const s=Math.min(st.clientWidth/W,st.clientHeight/H);
+  cv.style.width=Math.floor(W*s)+'px'; cv.style.height=Math.floor(H*s)+'px'; }
+// Between matches a rotation re-shapes the world; mid-match we only re-fit so play isn't disturbed.
+let reflowT=null;
+function reflow(){ clearTimeout(reflowT); reflowT=setTimeout(()=>{ if(TOUCH&&(state==='menu'||state==='over')) newArena(arenaKey); else fit(); },120); fit(); }
+addEventListener('resize',reflow); addEventListener('orientationchange',reflow);
+try{ if(window.visualViewport) visualViewport.addEventListener('resize',reflow); }catch(e){}
+initTouch(); newArena(settings.arena); fit(); refreshRecord();
 requestAnimationFrame(frame);
 window.__nova={get state(){return state;},get tanks(){return tanks;},startMatch,autoPick,playerFire,get draft(){return draft;},WEAPONS,commitFire,get projs(){return projs;},get fx(){return fx;},settings};
 })();
